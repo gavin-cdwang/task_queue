@@ -9,19 +9,26 @@
 #include <stdio.h>
 #include "task_queue.h"
 
+#define FOREVER_RUN while (1) {}
+
 void *run(void *arg)
 {
-
+    int count = 0;
     for (; ; ) {
-        printf("Thread:%x; FUNC:%s; %s\n",pthread_self(),__func__,(char *)arg);
-//        sleep(1);
+        printf("Thread:%x; FUNC:%s; %s ;%d\n",(int)pthread_self(),__func__,(char *)arg,count);
+        sleep(1);
+        count++;
+        if(count == 5){
+            break;
+        }
     }
+    return (void *)0;
 }
 
 int main(int argc, const char * argv[]) {
     
     struct tq_queue *queue = NULL;
-    queue = tq_create_queue(20, 10);
+    queue = tq_create_queue(10);
     if(NULL == queue){
         exit(-1);
     }
@@ -31,19 +38,19 @@ int main(int argc, const char * argv[]) {
     struct tq_task *task2 = tq_create_task(run, "test2");
     struct tq_task *task3 = tq_create_task(run, "test3");
     struct tq_task *task4 = tq_create_task(run, "test4");
-    struct tq_task *task5 = tq_create_task(run, "test5");
-    struct tq_task *task6 = tq_create_task(run, "test6");
 
     tq_dispatch_task(queue, task0);
     tq_dispatch_task(queue, task1);
     tq_dispatch_task(queue, task2);
+    tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
+//    tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
+//    sleep(1);
+//    tq_destroy_queue(queue, DESTROY_RIGHT_NOW);
+    printf("main !!\n");
     tq_dispatch_task(queue, task3);
     tq_dispatch_task(queue, task4);
-    tq_dispatch_task(queue, task5);
-    tq_dispatch_task(queue, task6);
 
-    while (1) {
-        
-    }
+    FOREVER_RUN
+    
     return 0;
 }
