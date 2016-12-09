@@ -18,7 +18,10 @@ void *worker_thread_routine(void *arg)
         pthread_mutex_lock(&queue->mutex);
         
         if(!queue->keep_alive){
-            //TODO:print
+            //NOTE: on macOS env; pthread_t is a struct so maybe WARNING;
+            printf("THREAD:%x; FUNC:%s; INFO:%s\n",pthread_self(),__func__,"queue do not keep_alive");
+            
+            pthread_mutex_unlock(&queue->mutex);
             break;
         }
     
@@ -28,6 +31,7 @@ void *worker_thread_routine(void *arg)
         
         struct tq_task *task = queue->fst;
         queue->fst = queue->fst->next;
+        queue->cur_task_num--;
         
         pthread_mutex_unlock(&queue->mutex);
         
@@ -40,7 +44,18 @@ void *worker_thread_routine(void *arg)
     return (void *)0;
 }
 
-//TODO: assign a "queue_id" to make queue unique
+
+//TODO: assign a "queue_id" to make queue unique ;better to use HASH to make a unique quque_id
+
+/**
+ use this to create a task queue
+
+ @param max_task_num      max tasks
+ @param worker_thread_num  to create X worker threads
+
+ @return the task queue you just created
+ */
+
 struct tq_queue *tq_create_queue(u_int max_task_num,u_int worker_thread_num)
 {
     struct tq_queue *queue = NULL;
@@ -88,6 +103,14 @@ struct tq_queue *tq_create_queue(u_int max_task_num,u_int worker_thread_num)
     return queue;
 }
 
+
+/**
+ use this to create a task with a func name and an arg
+
+ @param start_routine name of func  to run
+
+ @return the task you just created
+ */
 struct tq_task *tq_create_task(void *( *start_routine)(void *),void *arg)
 {
     struct tq_task *task = NULL;
@@ -106,10 +129,25 @@ struct tq_task *tq_create_task(void *( *start_routine)(void *),void *arg)
     return task;
 }
 
+
+/**
+ use this to dispatch a task;the func will add you task into the task queue;
+ so you task will be run in thread;
+
+ @param queue the queue you want to add task into
+ @param task  the task you want to add
+
+ @return OK-0 ERR-1
+ */
 int tq_dispatch_task(struct tq_queue *queue, struct tq_task *task)
 {
     //producer
     pthread_mutex_lock(&queue->mutex);
+    
+    if(!queue->keep_alive){
+        fprintf(stderr, "queue never keep alive\n");
+        return -1;
+    }
     
     if(!queue->fst || !queue->tail){
         queue->fst = queue->tail = task;
@@ -120,20 +158,25 @@ int tq_dispatch_task(struct tq_queue *queue, struct tq_task *task)
     queue->tail->next = NULL;
     queue->cur_task_num++;
     
-    pthread_mutex_unlock(&queue->mutex);
-    
     if(NULL != queue->fst){
         // TBD: WHICH ONE ?
-        fprintf(stderr,"FUNC:%s; cond signal\n",__func__);
+        //fprintf(stderr,"FUNC:%s; cond signal\n",__func__);
         pthread_cond_signal(&queue->cond);
         //pthread_cond_broadcast(&queue->cond);
     }
     
-
-    
+    pthread_mutex_unlock(&queue->mutex);
     return 0;
 }
 
+
+/**
+ destroy a task
+
+ @param task task obj
+
+ @return OK-0 ERR-!0
+ */
 int tq_destroy_task(struct tq_queue *task)
 {
     //TODO:
@@ -141,9 +184,35 @@ int tq_destroy_task(struct tq_queue *task)
     return 0;
 }
 
+
+/**
+ 销毁队列，如果队列中还有任务，则等待所有任务只执行完再销毁。并且使得队列不能够再添加任务。
+
+ @param queue <#queue description#>
+
+ @return <#return value description#>
+ */
 int tq_destroy_queue(struct tq_queue *queue)
 {
     //TODO:
+    pthread_mutex_lock(&queue->mutex);
+    
+    //防止重复销毁
+    if(!queue->keep_alive){
+        pthread_mutex_unlock(&queue->mutex);
+        return 0;
+    }
+    
+    queue->keep_alive = 0;
+    
+    while(queue->cur_task_num > 0){
+        pthread_cond_wait(&queue->cond, &queue->mutex);
+    }
+    
+        //FREE
+    
+    pthread_mutex_unlock(&queue->mutex);
+    
     return 0;
 }
 

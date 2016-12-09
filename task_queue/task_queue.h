@@ -30,7 +30,7 @@ struct tq_task {
 
 
 /**
- 任务队列结构体
+ 任务队列结构体 (为了降低复杂度，结构体设计的比较简单)
  */
 struct tq_queue {
     u_int worker_thread_num;        //线程队列中线程数
