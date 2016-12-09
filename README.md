@@ -8,7 +8,8 @@ task_queue.h
 ####1.先创建任务队列
 ```C
 struct tq_queue *queue = NULL;
-queue = tq_create_queue(10);
+int threads_num = 10; //创建10个线程，完成任务队列中的任务
+queue = tq_create_queue(threads_num);
 if(NULL == queue){
     exit(-1);
 }
@@ -36,6 +37,7 @@ struct tq_task *task = tq_create_task(run, "test_task");
 
 ####3.调度任务
 ```C
+//向任务队列中添加任务
 tq_dispatch_task(queue, task);
 
 ```
