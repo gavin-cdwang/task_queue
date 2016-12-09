@@ -6,7 +6,7 @@
 task_queue.h
 
 ###用法
-####1.先创建任务队列
+####1.创建任务队列
 ```C
 struct tq_queue *queue = NULL;
 int threads_num = 10; //创建10个线程，完成任务队列中的任务
