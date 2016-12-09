@@ -46,6 +46,8 @@ tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
 //销毁队列，销毁时会等待任务队列中所有任务都完成，会阻塞主线程
 tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
 
+####5.注意
+当调用tq_destroy_queue销毁队列后，再往队列中添加任务会遭到拒绝。返回非0值。
 
 
 
