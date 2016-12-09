@@ -54,6 +54,8 @@ tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
 ####5.注意
 当调用tq_destroy_queue销毁队列后，再往队列中添加任务会遭到拒绝。返回非0值。
 
+####6.TODO
+1.提供队列中任务**同步串行执行**功能
 
 
 
