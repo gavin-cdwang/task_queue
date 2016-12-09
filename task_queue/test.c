@@ -42,9 +42,8 @@ int main(int argc, const char * argv[]) {
     tq_dispatch_task(queue, task0);
     tq_dispatch_task(queue, task1);
     tq_dispatch_task(queue, task2);
-    tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
-//    tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
-//    sleep(1);
+//    tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
+    tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
 //    tq_destroy_queue(queue, DESTROY_RIGHT_NOW);
     printf("main !!\n");
     tq_dispatch_task(queue, task3);

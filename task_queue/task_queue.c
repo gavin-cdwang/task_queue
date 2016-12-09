@@ -55,10 +55,18 @@ static void *_worker_thread_routine(void *arg)
         while(NULL == queue->fst){
             pthread_cond_signal(&queue->empty);
             pthread_cond_wait(&queue->has_task, &queue->mutex);
+            // 最后销毁队列时回broadcast 这里收到处理退出。
+            if(!queue->accept_new){
+                pthread_mutex_unlock(&queue->mutex);
+                pthread_exit(NULL);
+            }
         }
         
         struct tq_task *task = queue->fst;
-        queue->fst = queue->fst->next;
+        if(queue->fst || queue->tail){
+             queue->fst = queue->fst->next;
+        }
+       
         queue->cur_task_num--;
         
         pthread_mutex_unlock(&queue->mutex);
@@ -70,8 +78,8 @@ static void *_worker_thread_routine(void *arg)
         tq_destroy_task(task);
         task = NULL;
     }
-    printf("THREAD:%x; FUNC:%s; INFO:%s\n",(int )pthread_self(),__func__,"thread exit");
-    return (void *)0;
+
+    pthread_exit(NULL);
 }
 
 
@@ -251,7 +259,10 @@ static void *_destroy_queue(void *arg)
 
     // 设置队列死亡
     queue->keep_alive = 0;
+    //唤醒所有线程准备退出
+    pthread_cond_broadcast(&queue->has_task);
     pthread_mutex_unlock(&queue->mutex);
+
 
     // 线程合并，回收线程资源
     int i;
