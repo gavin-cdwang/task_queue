@@ -6,7 +6,7 @@ task_queue.h
 
 ###用法
 ####1.先创建任务队列
-```
+```C
 struct tq_queue *queue = NULL;
 queue = tq_create_queue(10);
 if(NULL == queue){
@@ -15,7 +15,7 @@ if(NULL == queue){
 ```
 
 ####2.创建任务
-```
+```C
 void *run(void *arg)
 {
     int count = 0;
@@ -35,10 +35,18 @@ struct tq_task *task = tq_create_task(run, "test_task");
 ```
 
 ####3.调度任务
-```
+```C
 tq_dispatch_task(queue, task);
 
 ```
+
+####4.销毁队列
+//异步方式销毁队列，销毁时会等待任务队列中所有任务都完成，但不会阻塞主线程
+tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
+//销毁队列，销毁时会等待任务队列中所有任务都完成，会阻塞主线程
+tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
+
+
 
 
 
