@@ -41,9 +41,8 @@ struct tq_queue {
     struct tq_task *fst;            //任务队列头指针
     struct tq_task *tail;           //任务队列尾指针
     u_int keep_alive;               //当前队列是否存活
-    u_int accept_new;               //是否接受
+    u_int accept_new;               //是否接受新任务
     pthread_mutex_t mutex;
-//    pthread_mutex_t special;
     pthread_cond_t has_task;
     pthread_cond_t empty;
 

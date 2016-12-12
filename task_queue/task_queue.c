@@ -316,6 +316,7 @@ int tq_destroy_queue(struct tq_queue *queue,u_int destroy_time)
     switch (destroy_time) {
         // 立刻停止所有任务销毁任务队列
         case DESTROY_RIGHT_NOW:
+#if 0
             for(i = 0; i < queue->worker_thread_num; i++){
                 pthread_kill(queue->worker_thread_ids[i], SIGKILL);
             }
@@ -328,7 +329,7 @@ int tq_destroy_queue(struct tq_queue *queue,u_int destroy_time)
             fprintf(stderr, "FUNC:%s; finish destroy task queue!\n",__func__);
 
             break;
-        
+#endif
         // 异步等待所有任务完成再销毁，为了防止主线程阻塞，开辟新线程去释放资源
         case WAIT_ALL_TASKS_FINISHED_ASYNC:
             if(pthread_create(&id, attr, _destroy_queue, queue)){
