@@ -5,8 +5,8 @@
 ###头文件
 task_queue.h
 
-###用法 
-####1.创建任务队列 
+### 用法 
+#### 1.创建任务队列 
 ```C
 struct tq_queue *queue = NULL;
 int threads_num = 10; //创建10个线程，完成任务队列中的任务
@@ -16,7 +16,7 @@ if(NULL == queue){
 }
 ```
 
-####2.创建任务 
+#### 2.创建任务 
 ```C
 void *run(void *arg)
 {
@@ -36,14 +36,14 @@ struct tq_task *task = tq_create_task(run, "test_task");
 
 ```
 
-####3.调度任务 
+#### 3.调度任务 
 ```C
 //向任务队列中添加任务
 tq_dispatch_task(queue, task);
 
 ```
 
-####4.销毁队列 
+#### 4.销毁队列 
 ```C
 //异步方式销毁队列，销毁时会等待任务队列中所有任务都完成，但不会阻塞主线程
 tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
@@ -51,10 +51,10 @@ tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_ASYNC);
 tq_destroy_queue(queue,WAIT_ALL_TASKS_FINISHED_SYNC);
 ```
 
-####5.注意 
+#### 5.注意 
 当调用tq_destroy_queue销毁队列后，再往队列中添加任务会遭到拒绝。返回非0值。
 
-####6.TODO 
+#### 6.TODO 
 1.提供队列中任务**同步串行执行**功能
 
 
